@@ -4,14 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-aws-config = "1.5.14"
+lazy_static = "1.4.0"
+log = "0.4"
+fern = "0.7"
+colored = "2.2"
+humantime = "2.1.0"
+parse_duration = "2.1.1"
+aws-config = { version = "1.1.7", features = ["behavior-version-latest"] }
+aws-sdk-config = "1.57.0"
 aws-sdk-cloudwatchlogs = "1.65.0"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 clap = { version = "4.1.8", features = ["derive"] }
-log = "0.4"
-env_logger = "0.9"
 chrono = { version = "0.4", features = ["clock"] }
-parse_duration = "2.1.1"
-
-# sqlx with SQLite support
 sqlx = { version = "0.6.2", features = ["runtime-tokio-native-tls", "sqlite"] }

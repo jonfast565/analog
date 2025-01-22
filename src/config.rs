@@ -10,14 +10,14 @@ use parse_duration::parse;
     about = "Fetch AWS CloudWatch logs and store them in SQLite (via sqlx)."
 )]
 pub struct AppConfig {
-    #[arg(long)]
+    #[arg(long, default_value = "us-east-1")]
     pub region: Option<String>,
 
-    #[arg(long)]
+    #[arg(long, default_value = "default")]
     pub profile: Option<String>,
 
-    #[arg(long)]
-    pub log_group: Option<String>,
+    #[arg(long, default_value = "default")]
+    pub log_groups: Option<Vec<String>>,
 
     #[arg(long, default_value = "1h")]
     pub duration: String,
@@ -41,3 +41,4 @@ impl AppConfig {
         (start_time, end_time)
     }
 }
+
