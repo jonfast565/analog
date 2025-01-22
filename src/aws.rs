@@ -2,6 +2,7 @@ use aws_config::{Region, SdkConfig};
 use aws_sdk_cloudwatchlogs::{types::{FilteredLogEvent, LogGroup}, Client};
 use log::info;
 use crate::config::AppConfig;
+use crate::models::SendableError;
 
 lazy_static! {
     static ref AWS_REGIONS: Vec<&'static str> = vec![
@@ -20,7 +21,7 @@ fn find_region(input: &str) -> Option<&'static str> {
     AWS_REGIONS.iter().find(|&&region| region == input).copied()
 }
 
-pub async fn build_config(app_config: &AppConfig) -> Result<SdkConfig, Box<dyn std::error::Error>> {
+pub async fn build_config(app_config: &AppConfig) -> Result<SdkConfig, SendableError> {
     let mut loader = aws_config::from_env();
 
     if let Some(profile_name) = app_config.profile.clone() {
@@ -37,7 +38,7 @@ pub async fn build_config(app_config: &AppConfig) -> Result<SdkConfig, Box<dyn s
     Ok(shared_config)
 }
 
-pub async fn get_log_groups(client: &Client) -> Result<Vec<LogGroup>, Box<dyn std::error::Error>> {
+pub async fn get_log_groups(client: &Client) -> Result<Vec<LogGroup>, SendableError> {
     let mut result = Vec::new();
     let mut next_token = None;
 
@@ -65,7 +66,7 @@ pub async fn fetch_logs(
     log_group_name: &str,
     start_time: i64,
     end_time: i64,
-) -> Result<Vec<FilteredLogEvent>, Box<dyn std::error::Error>> {
+) -> Result<Vec<FilteredLogEvent>, SendableError> {
     let mut result = Vec::new();
     let mut next_token = None;
 
@@ -80,7 +81,7 @@ pub async fn fetch_logs(
             .await?;
 
         if let Some(events) = resp.events {
-            info!("Adding another {} events to the log", events.len());
+            info!("Retrieved {} event(s) for log group: {}", events.len(), log_group_name);
             result.extend(events);
         }
 

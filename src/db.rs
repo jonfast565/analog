@@ -1,9 +1,12 @@
+use std::ops::Deref;
+use std::sync::Arc;
 use chrono::Duration;
 use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, Pool, Sqlite, SqlitePool};
-
+use tokio::sync::Mutex;
 use crate::{config::AppConfig, models::SavedLogEvent};
+use crate::models::SendableError;
 
-pub async fn init_connection(app_config: &AppConfig) -> Result<Pool<Sqlite>, sqlx::Error> {
+pub async fn init_connection(app_config: &AppConfig) -> Result<Pool<Sqlite>, SendableError> {
     let mut options = SqliteConnectOptions::new()
         .filename(app_config.sqlite_path.clone())
         .create_if_missing(true);
@@ -11,14 +14,16 @@ pub async fn init_connection(app_config: &AppConfig) -> Result<Pool<Sqlite>, sql
         .log_statements(log::LevelFilter::Debug)
         .log_slow_statements(
             log::LevelFilter::Warn,
-            Duration::seconds(10).to_std().unwrap(),
+            Duration::seconds(10).to_std()?,
         );
     let unmutable_options = options_with_logs.clone();
     let connection = SqlitePool::connect_with(unmutable_options).await?;
     Ok(connection)
 }
 
-pub async fn init_sqlite_db(pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn init_sqlite_db(pool: &Arc<Mutex<Pool<Sqlite>>>) -> Result<(), SendableError> {
+    let locked_pool = pool.lock().await;
+    let pool_deref = locked_pool.deref();
     sqlx::query(
         r#"
         CREATE TABLE IF NOT EXISTS cloudwatch_logs (
@@ -30,23 +35,24 @@ pub async fn init_sqlite_db(pool: &SqlitePool) -> Result<(), sqlx::Error> {
         )
         "#,
     )
-    .execute(pool)
+    .execute(pool_deref)
     .await?;
 
     sqlx::query("CREATE INDEX IF NOT EXISTS idx_log_group ON cloudwatch_logs (log_group)")
-        .execute(pool)
+        .execute(pool_deref)
         .await?;
     sqlx::query("CREATE INDEX IF NOT EXISTS idx_timestamp ON cloudwatch_logs (timestamp)")
-        .execute(pool)
+        .execute(pool_deref)
         .await?;
 
     Ok(())
 }
 
 pub async fn dedupe_rows(
-    pool: &SqlitePool
-) -> Result<(), sqlx::Error> {
-    let mut tx = pool.begin().await?;
+    pool: &Arc<Mutex<Pool<Sqlite>>>
+) -> Result<(), SendableError> {
+    let locked_pool = pool.lock().await;
+    let mut tx = locked_pool.begin().await?;
     let sql = r#"
         DELETE FROM cloudwatch_logs
         WHERE id NOT IN (
@@ -61,11 +67,12 @@ pub async fn dedupe_rows(
 }
 
 pub async fn store_events_in_sqlite(
-    pool: &SqlitePool,
+    pool: &Arc<Mutex<Pool<Sqlite>>>,
     log_group_name: &str,
     events: &[SavedLogEvent],
-) -> Result<(), sqlx::Error> {
-    let mut tx = pool.begin().await?;
+) -> Result<(), SendableError> {
+    let locked_pool = pool.lock().await;
+    let mut tx = locked_pool.begin().await?;
 
     let insert_sql = r#"
         INSERT INTO cloudwatch_logs (log_group, event_id, timestamp, message)

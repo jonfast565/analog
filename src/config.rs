@@ -16,7 +16,7 @@ pub struct AppConfig {
     #[arg(long, default_value = "default")]
     pub profile: Option<String>,
 
-    #[arg(long, default_value = "default")]
+    #[arg(long, default_value = "all")]
     pub log_groups: Option<Vec<String>>,
 
     #[arg(long, default_value = "1h")]
