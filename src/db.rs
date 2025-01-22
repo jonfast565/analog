@@ -83,6 +83,8 @@ pub async fn store_events_in_sqlite(
         let event_id = event.event_id.clone().unwrap_or_default();
         let timestamp = event.timestamp.unwrap_or(0);
         let message = event.message.clone().unwrap_or_default();
+        let _log_stream_name = event.log_stream_name.clone().unwrap_or_default();
+        let _ingestion_time = event.ingestion_time.clone().unwrap_or_default();
 
         sqlx::query(insert_sql)
             .bind(log_group_name)

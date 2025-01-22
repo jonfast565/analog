@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc, TimeZone};
 
+#[allow(dead_code)]
 pub fn millis_to_datetime(millis: i64) -> DateTime<Utc> {
     Utc.timestamp_millis_opt(millis)
         .single()
