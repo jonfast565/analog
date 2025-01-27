@@ -42,7 +42,7 @@ pub fn setup_logger() -> Result<(), SendableError> {
 async fn main() -> Result<(), SendableError> {
     setup_logger()?;
 
-    let max_concurrent_tasks = 5;
+    let max_concurrent_tasks = 3;
     let semaphore = Arc::new(Semaphore::new(max_concurrent_tasks));
 
     let app_config = AppConfig::parse();

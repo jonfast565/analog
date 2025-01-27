@@ -38,6 +38,21 @@ pub async fn init_sqlite_db(pool: &Arc<Mutex<Pool<Sqlite>>>) -> Result<(), Senda
     .execute(pool_deref)
     .await?;
 
+    sqlx::query(
+        r#"
+        CREATE VIEW IF NOT EXISTS cloudwatch_unique_logs_view AS
+        SELECT 
+            log_group,
+            message,
+            COUNT(*) AS message_count
+        FROM 
+            cloudwatch_logs
+        GROUP BY 
+            log_group, message;
+        "#
+    ).execute(pool_deref)
+    .await?;
+
     sqlx::query("CREATE INDEX IF NOT EXISTS idx_log_group ON cloudwatch_logs (log_group)")
         .execute(pool_deref)
         .await?;
