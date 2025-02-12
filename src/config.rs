@@ -3,6 +3,8 @@ use clap::{command, Parser};
 use log::error;
 use parse_duration::parse;
 
+use crate::models::BackendType;
+
 #[derive(Parser, Debug)]
 #[command(
     name = "analog",
@@ -24,6 +26,9 @@ pub struct AppConfig {
 
     #[arg(long, default_value = "logs.db")]
     pub sqlite_path: String,
+
+    #[arg(long, default_value = "datfiles")]
+    pub backend: BackendType
 }
 
 impl AppConfig {
