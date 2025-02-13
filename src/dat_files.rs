@@ -62,11 +62,11 @@ impl LogStorage for DatFilesStorage {
             let event_id = event_id.replace("\n", " ");
 
             // Format each field using fixed widths (helper function assumed to exist)
-            let field1 = format_fixed_field(&log_stream, 500);
-            let field2 = format_fixed_field(&ts_str, 100);
-            let field3 = format_fixed_field(&message, 1_000_000);
-            let field4 = format_fixed_field(&ingestion_time_str, 100);
-            let field5 = format_fixed_field(&event_id, 100);
+            let field1 = format_fixed_field(&log_stream, 50);
+            let field2 = format_fixed_field(&ts_str, 50);
+            let field3 = format_fixed_field(&message, 50000);
+            let field4 = format_fixed_field(&ingestion_time_str, 50);
+            let field5 = format_fixed_field(&event_id, 50);
 
             // Concatenate the fixed-width fields into one record.
             let record = format!("{}{}{}{}{}\n", field1, field2, field3, field4, field5);
