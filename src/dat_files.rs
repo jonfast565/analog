@@ -106,7 +106,8 @@ impl LogStorage for DatFilesStorage {
 /// Helper function: truncates a string to `width` characters and right-pads with spaces.
 fn format_fixed_field(value: &str, width: usize) -> String {
     let truncated: String = value.chars().take(width).collect();
-    let pad_len = width.saturating_sub(truncated.chars().count());
-    let padding = " ".repeat(pad_len);
-    format!("{}{}", truncated, padding)
+    // let pad_len = width.saturating_sub(truncated.chars().count());
+    // let padding = " ".repeat(pad_len);
+    // format!("{}{}", truncated, padding)
+    format!("{}", truncated)
 }
