@@ -3,6 +3,8 @@ use clap::{command, Parser};
 use log::error;
 use parse_duration::parse;
 
+use crate::models::BackendType;
+
 #[derive(Parser, Debug)]
 #[command(
     name = "analog",
@@ -24,11 +26,13 @@ pub struct AppConfig {
 
     #[arg(long, default_value = "logs.db")]
     pub sqlite_path: String,
+
+    #[arg(long, default_value = "dat-files")]
+    pub backend: BackendType
 }
 
 impl AppConfig {
     pub fn get_duration(&self) -> (DateTime<Utc>, DateTime<Utc>) {
-        // Parse duration string (e.g., "3h", "2days")
         let duration = match parse(&self.duration) {
             Ok(d) => d,
             Err(e) => {

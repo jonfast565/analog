@@ -1,3 +1,5 @@
+use clap::ValueEnum;
+
 pub type SendableError = Box<dyn std::error::Error + Send + Sync>;
 
 pub struct SavedLogEvent {
@@ -6,4 +8,10 @@ pub struct SavedLogEvent {
     pub message: Option<String>,
     pub ingestion_time: Option<i64>,
     pub event_id: Option<String>,
+}
+
+#[derive(ValueEnum, Debug, Clone)]
+pub enum BackendType {
+    Sqlite,
+    DatFiles
 }
